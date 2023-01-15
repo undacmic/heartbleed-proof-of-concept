@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Heartbleed Exploit Demo</title>
+  <style>
+    form { 
+        margin: 0 auto; 
+        width:250px;
+        text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  
+    <form method="get">
+        <fieldset>
+            <legend>User Registration Form</legend>
+            <table>
+                <tr>
+                    <td><label for="username">Username: </label></td>
+                    <td><input type="text" id="username" placeholder="Username"/></td>
+                </tr>
+                <tr>
+                    <td><label for="password">Password: </label></td>
+                    <td><input type="password" id="password"/></td>
+                </tr>
+            </table>
+        </fieldset>
+        <input id="btn" type="submit" value="Register" />
+    </form>
+    </div>
+
+  
+  <!--Cookie setup-->
+  <script>
+  function setCookie(name, value) {
+	    document.cookie = name + "=" + value + ";path=/";
+	}
+	
+  document.getElementById("btn").addEventListener('click', () => {
+    const username = document.getElementById('username').value;
+	const password = document.getElementById('password').value;
+	setCookie("username", username);
+	setCookie("password", password);
+	window.location.reload();
+  })
+  </script>
+</body>
+</html>

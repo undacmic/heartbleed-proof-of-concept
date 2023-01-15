@@ -1,45 +1,36 @@
-FROM ubuntu:trusty
+FROM debian:jessie
 
-RUN apt-get update && apt-get install build-essential curl -y
+# Environment
+ENV LANG C.UTF-8
+ENV LANGUAGE C.UTF-8
+ENV LC_ALL C.UTF-8
 
-RUN curl -k -L -O https://www.openssl.org/source/old/1.0.1/openssl-1.0.1a.tar.gz \
-    && tar -xzvf openssl-1.0.1a.tar.gz \
-    && rm openssl-1.0.1a.tar.gz 
+# Get current
+RUN apt-get update -y && apt-get dist-upgrade -y
 
-RUN curl -k -L -O https://nginx.org/download/nginx-1.10.2.tar.gz  \
-    && tar -xzvf nginx-1.10.2.tar.gz \
-    && rm nginx-1.10.2.tar.gz \
-    && cd nginx-1.10.2\
-    && ./configure \
-    --with-http_ssl_module \
-    --prefix=/usr/local/nginx/ \
-    --without-http_gzip_module \
-    --with-openssl=/openssl-1.0.1a \
-    --without-pcre \
-    --with-threads \
-    --without-http_rewrite_module \
-    && make \
-    && make install
+# Install packages 
+RUN apt-get install --force-yes -y wget apache2
 
+# Install vulnerable versions from snapshot archive
+RUN wget http://snapshot.debian.org/archive/debian/20130319T033933Z/pool/main/o/openssl/openssl_1.0.1e-2_amd64.deb -O /tmp/openssl_1.0.1e-2_amd64.deb && \
+ dpkg -i /tmp/openssl_1.0.1e-2_amd64.deb
 
-RUN cd openssl-1.0.1a \
-    && ./config \
-    && make \
-    && make install_sw
+RUN wget http://snapshot.debian.org/archive/debian/20130319T033933Z/pool/main/o/openssl/libssl1.0.0_1.0.1e-2_amd64.deb -O /tmp/libssl1.0.0_1.0.1e-2_amd64.deb && \
+ dpkg -i /tmp/libssl1.0.0_1.0.1e-2_amd64.deb
 
-RUN mkdir -p /server/private 
+ENV DEBIAN_FRONTEND noninteractive
 
-RUN /usr/local/ssl/bin/openssl req -x509 -newkey rsa:4096 -keyout /server/private/privateKey.pem -nodes \
-    -days 365 \
-    -out /server/private/testCertificate.pem \
-    -subj "/C=RO/ST=Romania/L=Bucharest/O=UPB/CN=www.hearthbleed-demo.com"
+# Setup vulnerable web server and enable SSL based Apache instance
+COPY /web /var/www/html/
+RUN sed -i 's/^NameVirtualHost/#NameVirtualHost/g' /etc/apache2/ports.conf && \
+    sed -i 's/^Listen/#Listen/g' /etc/apache2/ports.conf 
+RUN a2enmod ssl && \
+    a2dissite 000-default.conf && \
+    a2ensite default-ssl
 
 
-RUN echo "heart:$(/usr/local/ssl/bin/openssl passwd bleed)" > /server/htpasswd
-COPY test.html /server/html/
-COPY nginx.conf /usr/local/nginx/conf
+RUN apt-get autoremove && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 EXPOSE 443
 
-CMD echo "Vulnerable Nginx v1.10.2 | OpenSSL v1.0.1a started ..." \
-    && /usr/local/nginx/sbin/nginx
+CMD ["/usr/sbin/apache2ctl", "-D FOREGROUND"]
