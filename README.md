@@ -30,3 +30,5 @@ gcc -o heartbleed heartbleed.c -lcrypto
 
 **You do need to specify the correct port.**
 
+![Heartbleed Leak of 65535 bytes](./resources/heartbleed-dump.png)
+
