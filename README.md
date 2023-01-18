@@ -32,3 +32,9 @@ gcc -o heartbleed heartbleed.c -lcrypto
 
 ![Heartbleed Leak of 65535 bytes](./resources/heartbleed-dump.png)
 
+## Preview
+
+| Thesis                                                                                                       | Presentation                                                                                                                         |
+|--------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| <a href="article/export.pdf"><kbd><img src="article/preview.png" width="400px" alt="Article preview"></kbd></a> | <a href="presentation/export.pdf"><kbd><img src="presentation/preview.png" width="400px" alt="Presentation preview"></kbd></a> |
+
